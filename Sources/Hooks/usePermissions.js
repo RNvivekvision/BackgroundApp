@@ -19,12 +19,15 @@ const usePermissions = () => {
 
   const requestPermission = async () => {
     try {
-      const permissionStatus = await request(
-        Platform.select({
-          android: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-          ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-        }),
-      );
+      let permissionStatus;
+      if (Platform.OS === 'ios') {
+        permissionStatus = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+      } else {
+        await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+        await request(PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION);
+        permissionStatus = RESULTS.GRANTED;
+      }
+      console.log('DEV', permissionStatus);
       return permissionStatus === RESULTS.GRANTED;
     } catch (error) {
       console.error('Error requesting location permission:', error);
